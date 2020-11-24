@@ -1,0 +1,7 @@
+Package: piazza
+Version: 0.1-0
+Title: Download piazza course posts
+Description: Programmatic interface for downloading course posts, etc. from a piazz course.
+Author: Duncan Temple Lang <dtemplelang@ucdavis.edu>
+Imports: XML, RCurl, RJSONIO
+Suggests: RBrowserCookies

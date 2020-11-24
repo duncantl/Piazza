@@ -1,0 +1,12 @@
+import(RCurl)
+import(XML)
+import(RJSONIO)
+
+export(getFeed)
+export(getPost, getCoursePosts)
+
+export(mkPiazzaCon)
+
+#updatePiazzaCon
+
+

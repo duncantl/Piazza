@@ -1,5 +1,5 @@
 getCoursePosts =
-function(courseID, con = mkPiazzaCon(...), ..., sleep = 1)
+function(courseID = getCourseID(), con = mkPiazzaCon(...), ..., sleep = 1)
 {
     info = getIAD.CSRF(con)
     # update the connection with CSRF-Token header and others.
@@ -45,14 +45,15 @@ getFeed =
 function(con, aid = "khutpb2e64i2", courseID = "kfj1hd7qyia1tq", offset = 0, limit = 1000)
 {
     params = list(method = "network.get_my_feed",
-                  params = list(nid = courseID, offset = as.integer(offset), limit = as.integer(limit), sort = "updated", student_view = "false"))
+                  params = list(nid = courseID, offset = as.integer(offset), limit = as.integer(limit),
+                                sort = "updated", student_view = "false"))
 
     doRequest(params, con, aid)
 }
 
 
 getPost =
-function(qid, aid, con, courseID = "kfj1hd7qyia1tq")
+function(qid, aid, con, courseID = getCourseID())
 {
    body  = list(method = "content.get", params = list(cid = NA, nid = courseID, "student_view" = FALSE))
    body$params$cid = qid
@@ -62,10 +63,16 @@ function(qid, aid, con, courseID = "kfj1hd7qyia1tq")
 
 
 getIAD.CSRF =
-function(con = getCurlHandle(cookie = getCookie()), courseID = "kfj1hd7qyia1tq", homeURL = sprintf("https://piazza.com/class/%s", courseID))
+function(con = getCurlHandle(cookie = getCookie()), courseID = getCourseID(),
+         homeURL = sprintf("https://piazza.com/class/%s", courseID))
 {
     h1 = getURLContent(homeURL, curl = con)
     doc = htmlParse(h1)
+
+    sc = getNodeSet(doc, "//meta[@name = 'csrf_token']")
+    if(length(sc))
+        return(c(csrf = unname(xmlGetAttr(sc[[1]], "content")), aid = ""))
+    
     sc = getNodeSet(doc, "//script[@type = 'text/javascript' and contains(., 'aid\":')]")
 
     txt = xmlValue(sc[[1]])
@@ -113,4 +120,25 @@ function(params, con, aid)
         stop("Problem with piazza request: ", ans$error)
 
     ans
+}
+
+
+getStats =
+function(courseID = getCourseID(), csrf = getIAD.CSRF(con)["csrf"], con = mkPiazzaCon(...), ...)
+{
+   params = list(method = "network.get_stats", params = list(nid = courseID))
+
+   ans = httpPOST("https://piazza.com/main/api", postfields = toJSON(params), curl = con,
+                  httpheader = c("Content-Type" = "application/json",
+                                 "CSRF-Token" = as.character(csrf)),
+                  followlocation = TRUE)
+
+   fromJSON(ans)
+}
+
+
+getCourseID =
+function()
+{
+   getOption("PiazzaCourseID", stop("Need to specify the piazza course id; no PiazzaCourseID option set"))
 }

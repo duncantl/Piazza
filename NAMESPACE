@@ -4,6 +4,7 @@ import(RJSONIO)
 
 export(getFeed)
 export(getPost, getCoursePosts)
+export(getStats)
 
 export(mkPiazzaCon)
 

@@ -6,7 +6,7 @@ function(courseID = getCourseID(), con = mkPiazzaCon(...), ..., sleep = 1)
     con = updatePiazzaCon(info['csrf'], con = con)
 
     # Get the feed of "all" the posts 0 to 1000 by default
-    feed = getFeed(con, info['aid'])
+    feed = getFeed(con, info['aid'], courseID)
 
     # Get each post. Need to wait between requests or Piazza will give a error and ask us to wait.
     lapply(feed$result$feed, function(f) { Sys.sleep(sleep); getPost(f$id, info['aid'], con)})
@@ -84,10 +84,10 @@ function(con = getCurlHandle(cookie = getCookie()), courseID = getCourseID(),
 }
 
 getCookie =
-function(file = "piazza.cookie")
+function(file = file.path(c(".", "~"), "piazza.cookie"))
 {
-    if(file.exists(file))
-        return(readLines(file, warn = FALSE)[1])
+    if(any( e <- file.exists(file)))
+        return(readLines(file[e][1], warn = FALSE)[1])
     
     RBrowserCookies::getLoginCookie("piazza.com")
 }

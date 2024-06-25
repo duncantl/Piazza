@@ -8,6 +8,10 @@ export(getStats)
 
 export(mkPiazzaCon)
 
+export(getUserInfo)
+
+export(mkPostDF)
+
 #updatePiazzaCon
 
 
